@@ -1,6 +1,7 @@
 #define LGFX_USE_V1
 #include <LovyanGFX.hpp>
 #include <ModbusMaster.h>
+#include "Untitled_Design.h"
 
 class LGFX : public lgfx::LGFX_Device {
   lgfx::Panel_ST7789 _panel_instance;
@@ -64,12 +65,9 @@ void setup() {
   tft.init();
   tft.setRotation(0); // 0 = Portrait
   tft.fillScreen(TFT_BLACK);
-  tft.setTextColor(TFT_WHITE, TFT_BLACK);
-  tft.setTextSize(2);
-  tft.setCursor(10, 10);
-  tft.println("NORVI X1");
-  tft.setCursor(10, 35);
-  tft.println("MD02 Sensor");
+  
+  // Draw the 240x160 PNG image from Untitled_Design.h at the top (x=0, y=0)
+  tft.drawPng(Untitled_Design, sizeof(Untitled_Design), 0, 0);
   
   // Initialize Modbus communication on Serial1, slave address 1
   node.begin(1, Serial1);
@@ -85,26 +83,46 @@ void loop() {
     int16_t tempRaw = node.getResponseBuffer(0);
     int16_t humRaw = node.getResponseBuffer(1);
     
-    // Adjusted by 100.0 to fix the decimal point issue
     float tempC = tempRaw / 100.0;
     float hum = humRaw / 100.0;
     
-    tft.fillRect(0, 70, 240, 100, TFT_BLACK);
-    tft.setCursor(10, 70);
-    tft.print("Temp: ");
-    tft.print(tempC, 2);
-    tft.println(" C");
+    // Clear only the bottom half of the screen (y=160 to 320)
+    tft.fillRect(0, 160, 240, 160, TFT_BLACK);
     
-    tft.setCursor(10, 100);
-    tft.print("Hum:  ");
+    // Draw Temperature Label (Warm Orange/Red color)
+    tft.setTextColor(tft.color565(255, 100, 100)); 
+    tft.setTextSize(2);
+    tft.setCursor(20, 175);
+    tft.print("Temperature:");
+    
+    // Draw Temperature Value
+    tft.setTextColor(TFT_WHITE);
+    tft.setTextSize(3);
+    tft.setCursor(20, 200);
+    tft.print(tempC, 2);
+    tft.print(" C");
+    
+    // Draw Humidity Label (Cool Cyan/Blue color)
+    tft.setTextColor(tft.color565(100, 200, 255)); 
+    tft.setTextSize(2);
+    tft.setCursor(20, 245);
+    tft.print("Humidity:");
+    
+    // Draw Humidity Value
+    tft.setTextColor(TFT_WHITE);
+    tft.setTextSize(3);
+    tft.setCursor(20, 270);
     tft.print(hum, 2);
-    tft.println(" %");
+    tft.print(" %");
     
     Serial.printf("Temperature: %.2f C, Humidity: %.2f %%\n", tempC, hum);
   } else {
-    tft.fillRect(0, 70, 240, 100, TFT_BLACK);
-    tft.setCursor(10, 70);
+    tft.fillRect(0, 160, 240, 160, TFT_BLACK);
+    tft.setTextColor(TFT_RED);
+    tft.setTextSize(2);
+    tft.setCursor(20, 200);
     tft.println("Sensor Error!");
+    tft.setCursor(20, 230);
     tft.print("Code: ");
     tft.println(result);
     
