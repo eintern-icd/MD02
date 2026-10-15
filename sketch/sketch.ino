@@ -58,17 +58,18 @@ void setup() {
   Serial.begin(115200);
   
   // Initialize Serial1 for RS-485 Modbus RTU communication to MD02
-  // MD02 default baud rate is 9600
   Serial1.begin(9600, SERIAL_8N1, RX_PIN, TX_PIN);
   
   // Initialize Display
   tft.init();
-  tft.setRotation(1);
+  tft.setRotation(0); // 0 = Portrait
   tft.fillScreen(TFT_BLACK);
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
   tft.setTextSize(2);
   tft.setCursor(10, 10);
-  tft.println("NORVI X1 - MD02 Sensor");
+  tft.println("NORVI X1");
+  tft.setCursor(10, 35);
+  tft.println("MD02 Sensor");
   
   // Initialize Modbus communication on Serial1, slave address 1
   node.begin(1, Serial1);
@@ -78,32 +79,31 @@ void loop() {
   uint8_t result;
   
   // XY-MD02 uses function code 0x04 (Read Input Registers)
-  // Register 0x0001 is Temperature, 0x0002 is Humidity
-  // We'll read 2 registers starting at 0x0001
   result = node.readInputRegisters(1, 2);
   
   if (result == node.ku8MBSuccess) {
     int16_t tempRaw = node.getResponseBuffer(0);
     int16_t humRaw = node.getResponseBuffer(1);
     
-    float tempC = tempRaw / 10.0;
-    float hum = humRaw / 10.0;
+    // Adjusted by 100.0 to fix the decimal point issue
+    float tempC = tempRaw / 100.0;
+    float hum = humRaw / 100.0;
     
-    tft.fillRect(10, 50, 300, 100, TFT_BLACK);
-    tft.setCursor(10, 50);
+    tft.fillRect(0, 70, 240, 100, TFT_BLACK);
+    tft.setCursor(10, 70);
     tft.print("Temp: ");
-    tft.print(tempC, 1);
+    tft.print(tempC, 2);
     tft.println(" C");
     
-    tft.setCursor(10, 80);
-    tft.print("Humidity: ");
-    tft.print(hum, 1);
+    tft.setCursor(10, 100);
+    tft.print("Hum:  ");
+    tft.print(hum, 2);
     tft.println(" %");
     
-    Serial.printf("Temperature: %.1f C, Humidity: %.1f %%\n", tempC, hum);
+    Serial.printf("Temperature: %.2f C, Humidity: %.2f %%\n", tempC, hum);
   } else {
-    tft.fillRect(10, 50, 300, 100, TFT_BLACK);
-    tft.setCursor(10, 50);
+    tft.fillRect(0, 70, 240, 100, TFT_BLACK);
+    tft.setCursor(10, 70);
     tft.println("Sensor Error!");
     tft.print("Code: ");
     tft.println(result);
