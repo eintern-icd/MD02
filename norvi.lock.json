@@ -2,28 +2,8 @@
   "version": 2,
   "enforcementLevel": "strict",
   "libraries": {
-    "manager": [
-      {
-        "name": "LovyanGFX",
-        "version": "1.2.33",
-        "scope": "shared"
-      },
-      {
-        "name": "ModbusMaster",
-        "version": "2.0.1",
-        "scope": "shared"
-      }
-    ],
-    "managerResolved": [
-      {
-        "name": "LovyanGFX",
-        "version": "1.2.33"
-      },
-      {
-        "name": "ModbusMaster",
-        "version": "2.0.1"
-      }
-    ],
+    "manager": [],
+    "managerResolved": [],
     "git": []
   }
 }
